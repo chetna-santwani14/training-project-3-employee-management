@@ -15,6 +15,7 @@ public static class SalaryBandCalculator
 
         var bands = paid.Select(employee =>
         {
+            // Share of people paid strictly less. Same salary stays in the same band.
             var lower = paid.Count(other => other.Salary < employee.Salary);
             var percentile = total == 0 ? 0 : (double)lower / total * 100;
             var band = percentile < 30 ? "Low" : percentile < 70 ? "Mid" : "High";

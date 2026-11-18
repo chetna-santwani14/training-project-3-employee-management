@@ -25,6 +25,7 @@ public static class EmployeePredicateFilter
 
         if (hireFrom is not null)
         {
+            // Copy the date out. A nullable captured in the lambda does not translate.
             var from = hireFrom.Value;
             predicate = predicate.And(employee => employee.HireDate >= from);
         }

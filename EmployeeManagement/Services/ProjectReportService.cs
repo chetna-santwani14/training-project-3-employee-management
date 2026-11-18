@@ -37,6 +37,7 @@ public class ProjectReportService
 
             if (assigned.Count == 0)
             {
+                // Still show the project so an empty one doesn't disappear from the report.
                 rows.Add(new ProjectStaffingDto { ProjectName = project.ProjectName });
                 continue;
             }

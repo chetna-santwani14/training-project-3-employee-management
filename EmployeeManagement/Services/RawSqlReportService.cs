@@ -22,8 +22,8 @@ public class RawSqlReportService
 
         await using var context = await _factory.CreateDbContextAsync(cancellationToken);
 
-        // SqlQuery parameterizes the interpolated values. The NOT EXISTS clause repeats the
-        // Maintenance rule because raw SQL does not apply the EF global query filter.
+        // The {status} and {minimumNetPay} bits go out as parameters, not pasted into the text.
+        // NOT EXISTS is here because this query never sees the global Maintenance filter.
         var rows = await context.Database.SqlQuery<EmployeeNetPayDto>($@"
             SELECT DISTINCT
                 e.EmployeeId,

@@ -10,6 +10,7 @@ public static class PredicateBuilder
         this Expression<Func<T, bool>> left,
         Expression<Func<T, bool>> right)
     {
+        // Both lambdas have to share one parameter or EF can't turn the tree into SQL.
         var parameter = Expression.Parameter(typeof(T), "e");
         var leftBody = ReplaceParameter(left.Body, left.Parameters[0], parameter);
         var rightBody = ReplaceParameter(right.Body, right.Parameters[0], parameter);

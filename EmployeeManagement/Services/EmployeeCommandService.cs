@@ -32,6 +32,7 @@ public class EmployeeCommandService
         var strategy = context.Database.CreateExecutionStrategy();
         await strategy.ExecuteAsync(async () =>
         {
+            // Salary and the attendance row commit together. A failure after the salary save rolls both back.
             await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
             try
             {

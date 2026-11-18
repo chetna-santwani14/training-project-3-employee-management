@@ -1,9 +1,7 @@
 namespace EmployeeManagement.Models;
 
-/// <summary>
-/// Shape aligned with the existing Employee table (Database First).
-/// PerformanceRating, RowVersion and FullName live in Employee.Custom.cs so a re-scaffold does not remove them.
-/// </summary>
+// Matches the Employee table from the starter script.
+// Extra columns live in Employee.Custom.cs so a re-scaffold doesn't wipe them.
 public partial class Employee
 {
     public int EmployeeId { get; set; }

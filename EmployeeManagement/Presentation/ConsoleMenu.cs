@@ -52,13 +52,13 @@ public class ConsoleMenu
 
             if (option == 0)
             {
-                Console.WriteLine("Goodbye.");
+                Console.WriteLine("Bye.");
                 return;
             }
 
             await RunSafeAsync(() => RunOptionAsync(option, cancellationToken));
             Console.WriteLine();
-            Console.WriteLine("Press Enter to return to the menu.");
+            Console.WriteLine("Hit Enter to go back to the menu.");
             Console.ReadLine();
         }
     }
@@ -179,7 +179,7 @@ public class ConsoleMenu
     private async Task ShowMigrationsAsync(CancellationToken cancellationToken)
     {
         var status = await _database.GetMigrationStatusAsync(cancellationToken);
-        Console.WriteLine("Applied migrations:");
+        Console.WriteLine("Already applied:");
         foreach (var name in status.Applied)
         {
             Console.WriteLine("  " + name);
@@ -190,7 +190,7 @@ public class ConsoleMenu
             Console.WriteLine("  (none)");
         }
 
-        Console.WriteLine("Pending migrations:");
+        Console.WriteLine("Still pending:");
         foreach (var name in status.Pending)
         {
             Console.WriteLine("  " + name);
@@ -204,8 +204,8 @@ public class ConsoleMenu
         var ratingApplied = status.Applied.Any(name =>
             name.Contains("PerformanceRating", StringComparison.OrdinalIgnoreCase));
         Console.WriteLine(ratingApplied
-            ? "PerformanceRating migration is applied. Existing employees keep a null rating until it is set."
-            : "PerformanceRating migration is still pending.");
+            ? "PerformanceRating is in the database. Old rows stay null until someone sets a rating."
+            : "PerformanceRating migration hasn't been applied yet.");
     }
 
     private async Task ShowHighestHoursAsync(CancellationToken cancellationToken)
@@ -237,7 +237,7 @@ public class ConsoleMenu
 
         if (report.MissingSalary.Count > 0)
         {
-            Console.WriteLine("Excluded because salary is missing:");
+            Console.WriteLine("Left out, no salary on file:");
             foreach (var employee in report.MissingSalary)
             {
                 Console.WriteLine("  " + employee.EmployeeName);
@@ -247,7 +247,7 @@ public class ConsoleMenu
 
     private async Task ShowGroupingAsync(CancellationToken cancellationToken)
     {
-        Console.Write("Grouping keys (department, role, or department,role). Enter for both: ");
+        Console.Write("Group by department, role, or department,role (just press Enter for both): ");
         if (!InputValidator.TryParseGroupingKeys(Console.ReadLine(), out var keys))
         {
             Console.WriteLine(UserMessages.UnsupportedGrouping);
@@ -268,14 +268,14 @@ public class ConsoleMenu
 
     private async Task ShowPageAsync(CancellationToken cancellationToken)
     {
-        Console.Write("Page number: ");
+        Console.Write("Which page? ");
         if (!InputValidator.TryParsePage(Console.ReadLine(), out var page))
         {
             Console.WriteLine(UserMessages.PageTooSmall);
             return;
         }
 
-        Console.Write("Order by (FirstName, LastName, HireDate): ");
+        Console.Write("Sort by FirstName, LastName, or HireDate: ");
         if (!InputValidator.TryParseOrderField(Console.ReadLine(), out var orderBy))
         {
             Console.WriteLine(UserMessages.UnsupportedOrder);
@@ -294,12 +294,12 @@ public class ConsoleMenu
                 row.DepartmentName,
                 row.RoleName
             }));
-        Console.WriteLine($"Page {pageResult.Page} of {pageResult.TotalPages} ({pageResult.TotalCount} employees)");
+        Console.WriteLine($"Showing page {pageResult.Page} of {pageResult.TotalPages} ({pageResult.TotalCount} people)");
     }
 
     private async Task ShowChecksAsync(CancellationToken cancellationToken)
     {
-        Console.Write("Date (yyyy-MM-dd): ");
+        Console.Write("Which day? (yyyy-MM-dd): ");
         if (!InputValidator.TryParseDate(Console.ReadLine(), out var date))
         {
             Console.WriteLine(UserMessages.InvalidDate);
@@ -307,9 +307,9 @@ public class ConsoleMenu
         }
 
         var result = await _employees.RunChecksAsync(date, cancellationToken);
-        Console.WriteLine($"All Sales employees checked in before 09:00: {result.SalesCheckResult}");
-        Console.WriteLine($"Any Intern exists: {(result.InternExists ? "Yes" : "No")}");
-        Console.WriteLine($"Project \"Revamp Website\" exists: {(result.RevampWebsiteExists ? "Yes" : "No")}");
+        Console.WriteLine($"Did every Sales person check in before 9? {result.SalesCheckResult}");
+        Console.WriteLine($"Is there an Intern? {(result.InternExists ? "Yes" : "No")}");
+        Console.WriteLine($"Does \"Revamp Website\" exist? {(result.RevampWebsiteExists ? "Yes" : "No")}");
     }
 
     private async Task ShowProjectDirectoryAsync(CancellationToken cancellationToken)
@@ -322,7 +322,7 @@ public class ConsoleMenu
         }
 
         Console.WriteLine();
-        Console.WriteLine("Unique project names:");
+        Console.WriteLine("Project names, no duplicates:");
         foreach (var name in directory.UniqueProjectNames)
         {
             Console.WriteLine("  " + name);
@@ -331,21 +331,21 @@ public class ConsoleMenu
 
     private async Task ShowExpressionFilterAsync(CancellationToken cancellationToken)
     {
-        Console.Write("DepartmentId (blank to skip): ");
+        Console.Write("Department id (leave blank to skip): ");
         if (!InputValidator.TryParseOptionalPositiveInt(Console.ReadLine(), out var departmentId))
         {
             Console.WriteLine(UserMessages.InvalidNumber);
             return;
         }
 
-        Console.Write("RoleId (blank to skip): ");
+        Console.Write("Role id (leave blank to skip): ");
         if (!InputValidator.TryParseOptionalPositiveInt(Console.ReadLine(), out var roleId))
         {
             Console.WriteLine(UserMessages.InvalidNumber);
             return;
         }
 
-        Console.Write("Project status (Active, Completed, Maintenance, On Hold, or blank): ");
+        Console.Write("Project status, or blank (Active, Completed, Maintenance, On Hold): ");
         if (!InputValidator.TryParseProjectStatus(Console.ReadLine(), out var status))
         {
             Console.WriteLine(UserMessages.UnknownStatus);
@@ -357,18 +357,18 @@ public class ConsoleMenu
 
     private async Task ShowPredicateFilterAsync(CancellationToken cancellationToken)
     {
-        Console.Write("Department name (blank to skip): ");
+        Console.Write("Department name (blank skips it): ");
         var department = EmptyToNull(Console.ReadLine());
-        Console.Write("Role name (blank to skip): ");
+        Console.Write("Role name (blank skips it): ");
         var role = EmptyToNull(Console.ReadLine());
-        Console.Write("Hire date from (yyyy-MM-dd, blank to skip): ");
+        Console.Write("Hired from (yyyy-MM-dd, blank skips it): ");
         if (!InputValidator.TryParseOptionalDate(Console.ReadLine(), out var from))
         {
             Console.WriteLine(UserMessages.InvalidDate);
             return;
         }
 
-        Console.Write("Hire date to (yyyy-MM-dd, blank to skip): ");
+        Console.Write("Hired to (yyyy-MM-dd, blank skips it): ");
         if (!InputValidator.TryParseOptionalDate(Console.ReadLine(), out var to))
         {
             Console.WriteLine(UserMessages.InvalidDate);
@@ -386,35 +386,35 @@ public class ConsoleMenu
 
     private async Task UpdateSalaryAsync(CancellationToken cancellationToken)
     {
-        Console.Write("EmployeeId: ");
+        Console.Write("Employee id: ");
         if (!InputValidator.TryParsePositiveInt(Console.ReadLine(), out var employeeId))
         {
             Console.WriteLine(UserMessages.InvalidNumber);
             return;
         }
 
-        Console.Write("New base salary: ");
+        Console.Write("New salary: ");
         if (!InputValidator.TryParseSalary(Console.ReadLine(), out var salary))
         {
             Console.WriteLine(UserMessages.SalaryPositive);
             return;
         }
 
-        Console.Write("Attendance date (yyyy-MM-dd): ");
+        Console.Write("Check-in date (yyyy-MM-dd): ");
         if (!InputValidator.TryParseDate(Console.ReadLine(), out var date))
         {
             Console.WriteLine(UserMessages.InvalidDate);
             return;
         }
 
-        Console.Write("Check-in time (HH:mm): ");
+        Console.Write("What time did they check in? (HH:mm): ");
         if (!InputValidator.TryParseTime(Console.ReadLine(), out var time))
         {
             Console.WriteLine(UserMessages.InvalidTime);
             return;
         }
 
-        Console.Write("Simulate a failure after the salary change? (y/n): ");
+        Console.Write("Pretend the attendance insert fails so we can see the rollback? (y/n): ");
         var simulate = string.Equals(Console.ReadLine()?.Trim(), "y", StringComparison.OrdinalIgnoreCase);
 
         try
@@ -438,13 +438,13 @@ public class ConsoleMenu
     private async Task ShowFilterDemoAsync(CancellationToken cancellationToken)
     {
         var demo = await _database.GetMaintenanceFilterDemoAsync(cancellationToken);
-        Console.WriteLine("Standard queries (Maintenance employees hidden):");
+        Console.WriteLine("Normal list (Maintenance people are hidden):");
         foreach (var name in demo.WithFilter)
         {
             Console.WriteLine("  " + name);
         }
 
-        Console.WriteLine("IgnoreQueryFilters():");
+        Console.WriteLine("Same list with IgnoreQueryFilters():");
         foreach (var name in demo.WithoutFilter)
         {
             Console.WriteLine("  " + name);
@@ -453,21 +453,21 @@ public class ConsoleMenu
 
     private async Task ShowConcurrencyAsync(CancellationToken cancellationToken)
     {
-        Console.Write("EmployeeId: ");
+        Console.Write("Employee id: ");
         if (!InputValidator.TryParsePositiveInt(Console.ReadLine(), out var employeeId))
         {
             Console.WriteLine(UserMessages.InvalidNumber);
             return;
         }
 
-        Console.Write("First PerformanceRating (1-5): ");
+        Console.Write("First rating (1-5). This one gets saved: ");
         if (!InputValidator.TryParseRating(Console.ReadLine(), out var first))
         {
             Console.WriteLine(UserMessages.RatingRange);
             return;
         }
 
-        Console.Write("Second PerformanceRating (1-5): ");
+        Console.Write("Second rating (1-5). This one should lose the race: ");
         if (!InputValidator.TryParseRating(Console.ReadLine(), out var second))
         {
             Console.WriteLine(UserMessages.RatingRange);
@@ -475,29 +475,29 @@ public class ConsoleMenu
         }
 
         var result = await _commands.DemonstrateConcurrencyAsync(employeeId, first, second, cancellationToken);
-        Console.WriteLine($"First update stored rating {result.FirstValueSaved}.");
+        Console.WriteLine($"First save stuck. Rating is now {result.FirstValueSaved}.");
         Console.WriteLine(result.SecondUpdateMessage);
     }
 
     private async Task ShowStoredProcedureAsync(CancellationToken cancellationToken)
     {
-        Console.Write("DepartmentId (blank for all): ");
+        Console.Write("Department id, or blank for every department: ");
         if (!InputValidator.TryParseOptionalPositiveInt(Console.ReadLine(), out var departmentId))
         {
             Console.WriteLine(UserMessages.InvalidNumber);
             return;
         }
 
-        Console.Write("RoleId (blank for all): ");
+        Console.Write("Role id, or blank for every role: ");
         if (!InputValidator.TryParseOptionalPositiveInt(Console.ReadLine(), out var roleId))
         {
             Console.WriteLine(UserMessages.InvalidNumber);
             return;
         }
 
-        Console.Write("Sort by (FirstName, LastName, HireDate, DepartmentName). Enter for HireDate: ");
+        Console.Write("Sort by FirstName, LastName, HireDate, or DepartmentName (Enter = HireDate): ");
         var sortByInput = Console.ReadLine();
-        Console.Write("Direction (ASC or DESC). Enter for ASC: ");
+        Console.Write("ASC or DESC (Enter = ASC): ");
         if (!InputValidator.TryParseSort(sortByInput, Console.ReadLine(), out var sortBy, out var direction))
         {
             Console.WriteLine(UserMessages.UnsupportedOrder);
@@ -574,28 +574,28 @@ public class ConsoleMenu
     private static void PrintMenu()
     {
         Console.WriteLine();
-        Console.WriteLine("Employee Management System");
-        Console.WriteLine("1  Project staffing report");
-        Console.WriteLine("2  PerformanceRating migration status");
-        Console.WriteLine("3  Highest working hours");
-        Console.WriteLine("4  Hire order per department");
-        Console.WriteLine("5  Salary bands");
-        Console.WriteLine("6  Dynamic payroll grouping");
-        Console.WriteLine("7  Paged employees");
-        Console.WriteLine("8  Condition checks");
-        Console.WriteLine("9  Projects per employee");
-        Console.WriteLine("10 Role aggregates");
-        Console.WriteLine("11 Employees with assignments");
-        Console.WriteLine("12 Expression-tree filter");
-        Console.WriteLine("13 Predicate Builder filter");
-        Console.WriteLine("14 Completed projects, NetPay above 5000");
-        Console.WriteLine("15 Update salary and attendance");
-        Console.WriteLine("16 Maintenance filter demo");
-        Console.WriteLine("17 Concurrency demo");
-        Console.WriteLine("18 Employee department role view");
-        Console.WriteLine("19 Stored procedure");
-        Console.WriteLine("0  Exit");
-        Console.Write("Choose an option: ");
+        Console.WriteLine("Employee Management");
+        Console.WriteLine(" 1  Who is staffed on each project?");
+        Console.WriteLine(" 2  Did the PerformanceRating column get migrated?");
+        Console.WriteLine(" 3  Who logged the most hours? (ties included)");
+        Console.WriteLine(" 4  First, last, and 5th hire in each department");
+        Console.WriteLine(" 5  Salary bands (low / mid / high)");
+        Console.WriteLine(" 6  Bonus and net pay, grouped how you like");
+        Console.WriteLine(" 7  Employees, 10 per page");
+        Console.WriteLine(" 8  Sales check-in, intern, Revamp Website");
+        Console.WriteLine(" 9  Projects for each person, plus the unique names");
+        Console.WriteLine("10  Bonus, average net pay, and project count by role");
+        Console.WriteLine("11  Everyone, even people with no project");
+        Console.WriteLine("12  Filter built with an expression tree");
+        Console.WriteLine("13  Filter built with a predicate builder");
+        Console.WriteLine("14  Completed projects and net pay over 5000");
+        Console.WriteLine("15  Change a salary and add attendance (one transaction)");
+        Console.WriteLine("16  Maintenance people, with and without the filter");
+        Console.WriteLine("17  Two contexts, one employee");
+        Console.WriteLine("18  The employee / department / role view");
+        Console.WriteLine("19  GetEmployeesByDepartment");
+        Console.WriteLine(" 0  Exit");
+        Console.Write("What do you want to look at? ");
     }
 
     private static void WriteTable(IReadOnlyList<string> headers, IEnumerable<string[]> rows)

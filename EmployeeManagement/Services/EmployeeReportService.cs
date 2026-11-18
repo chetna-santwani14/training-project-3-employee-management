@@ -28,6 +28,7 @@ public class EmployeeReportService
                 TotalHours = employee.EmployeeProjects.Sum(assignment => (double?)assignment.HoursWorked) ?? 0d
             });
 
+        // Max first, then everyone who matches it. A single OrderBy/Take would drop a tie.
         var maximum = await totals.MaxAsync(row => (double?)row.TotalHours, cancellationToken);
         if (maximum is null)
         {
@@ -67,6 +68,7 @@ public class EmployeeReportService
                     .ThenByDescending(employee => employee.EmployeeId)
                     .Select(employee => employee.FirstName + " " + employee.LastName)
                     .FirstOrDefault(),
+                // Skip 4 is the 5th person. FirstOrDefault stays null when the department is smaller.
                 FifthHired = department.Employees
                     .OrderBy(employee => employee.HireDate)
                     .ThenBy(employee => employee.EmployeeId)
@@ -182,6 +184,7 @@ public class EmployeeReportService
 
         var query =
             from employee in context.Employees.AsNoTracking()
+            // Left join so people with no project still show up.
             join assignment in context.EmployeeProjects.AsNoTracking()
                 on employee.EmployeeId equals assignment.EmployeeId into assignments
             from assignment in assignments.DefaultIfEmpty()

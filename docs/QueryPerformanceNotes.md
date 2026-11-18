@@ -1,6 +1,6 @@
 # Query performance notes
 
-These are the choices to walk through in project review. Each read uses `AsNoTracking`. Queries stay `IQueryable` until one `ToListAsync` (or an aggregate such as `Count`, `Any`, `All`, or `Max`).
+Notes for the review. Reads use `AsNoTracking`. The query stays `IQueryable` until one `ToListAsync` (or `Count` / `Any` / `All` / `Max`).
 
 | Technique | Where it is used |
 | --- | --- |

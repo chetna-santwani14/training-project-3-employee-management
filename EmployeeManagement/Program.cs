@@ -17,7 +17,7 @@ public static class Program
         var connectionString = builder.Configuration.GetConnectionString("EmployeeManagement");
         if (string.IsNullOrWhiteSpace(connectionString))
         {
-            Console.WriteLine("Set ConnectionStrings:EmployeeManagement in appsettings.json or user secrets.");
+            Console.WriteLine("Put ConnectionStrings:EmployeeManagement in appsettings.json (or user secrets) first.");
             return;
         }
 
@@ -46,10 +46,10 @@ public static class Program
         catch (Exception exception)
         {
             logger.LogError(exception, "Database startup failed.");
-            Console.WriteLine("Unable to prepare the SQL Server database.");
+            Console.WriteLine("Couldn't get the database ready.");
             Console.WriteLine(exception.Message);
-            Console.WriteLine("Install SQL Server Express LocalDB, then run the application again.");
-            Console.WriteLine("The expected instance is (localdb)\\MSSQLLocalDB and the database name is EmployeeManagementDb.");
+            Console.WriteLine("This expects SQL Server Express LocalDB, instance (localdb)\\MSSQLLocalDB, database EmployeeManagementDb.");
+            Console.WriteLine("Start that, then run the app again.");
             return;
         }
 

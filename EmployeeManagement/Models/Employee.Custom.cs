@@ -2,10 +2,10 @@ namespace EmployeeManagement.Models;
 
 public partial class Employee
 {
-    /// <summary>Code First column. Null until HR records a rating. Allowed range is 1-5.</summary>
+    // Added with a migration. Null until someone records a rating (1-5).
     public int? PerformanceRating { get; set; }
 
-    /// <summary>Optimistic concurrency token. SQL Server generates this value.</summary>
+    // SQL Server fills this in. Used so two people can't overwrite the same row.
     public byte[] RowVersion { get; set; } = [];
 
     public string FullName => $"{FirstName} {LastName}";

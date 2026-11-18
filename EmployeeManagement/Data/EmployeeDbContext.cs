@@ -22,10 +22,9 @@ public class EmployeeDbContext : DbContext
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(EmployeeDbContext).Assembly);
 
-        // Employees assigned to at least one Maintenance project are hidden from normal queries.
-        // The same predicate is repeated in the raw SQL, the view, and the stored procedure,
-        // because those bypass this filter. A second filter on EmployeeProject loops back into
-        // this one and overflows the query pipeline, so the rule stays on Employee only.
+        // Hide anyone sitting on a Maintenance project. Raw SQL, the view, and the procedure
+        // repeat this check themselves because they skip the filter. Don't add the same
+        // filter on EmployeeProject — it loops back into this one and the query blows up.
         modelBuilder.Entity<Employee>().HasQueryFilter(employee =>
             !employee.EmployeeProjects.Any(assignment => assignment.Project.Status == ProjectStatuses.Maintenance));
 
@@ -58,10 +57,8 @@ public class EmployeeDbContext : DbContext
         return base.SaveChangesAsync(cancellationToken);
     }
 
-    /// <summary>
-    /// SQL Server generates rowversion. The SQLite tests used by this project stamp a new token
-    /// so optimistic concurrency can be demonstrated without SQL Server.
-    /// </summary>
+    // SQL Server writes rowversion itself. The SQLite tests stamp a new value so the
+    // concurrency demo still fails the second save.
     private void StampRowVersionsForNonSqlServer()
     {
         if (Database.IsSqlServer())

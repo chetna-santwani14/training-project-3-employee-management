@@ -1,6 +1,6 @@
-# Training Project 3 — Employee Management System
+# Training Project 3 — Employee Management
 
-Console application for the LINQ and EF Core training brief. It answers the 19 HR, payroll, and staffing questions from the BRD and FSD, and adds the cross-cutting quality rules (FR-020).
+Console app for the LINQ and EF Core brief. The menu walks through the 19 questions (staffing, payroll, filters, the transaction, concurrency, the view, and the stored procedure) plus the FR-020 checks.
 
 ## Assumptions taken from the open questions
 
